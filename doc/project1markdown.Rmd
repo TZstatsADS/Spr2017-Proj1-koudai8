@@ -1,0 +1,197 @@
+---
+title: "Project1Markdown"
+author: "Hongyi Zhu"
+date: "January 29, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Loading required libraries
+
+```{r}
+library(tm)
+library(wordcloud)
+library(dplyr)
+library(tidytext)
+library(ggplot2)
+```
+
+# Set up logistics such as reading in data and setting up corpus
+
+```{r}
+
+# Relative path points to the local folder
+folder.path="../data/InauguralSpeeches/"
+
+# get the list of file names
+speeches=list.files(path = folder.path, pattern = "*.txt")
+
+# Truncate file names so it is only showing "FirstLast-Term"
+prez.out=substr(speeches, 6, nchar(speeches)-4)
+
+# Create a vector NA's equal to the length of the number of speeches
+length.speeches=rep(NA, length(speeches))
+
+# Create a corpus
+ff.all<-Corpus(DirSource(folder.path))
+```
+
+# Clean the data
+
+```{r}
+
+# Use tm_map to strip all white spaces to a single space, to lower case case, remove stop words, empty strings and punctuation.
+ff.all<-tm_map(ff.all, stripWhitespace)
+ff.all<-tm_map(ff.all, content_transformer(tolower))
+ff.all<-tm_map(ff.all, removeWords, stopwords("english"))
+ff.all<-tm_map(ff.all, removeWords, c("can", "may", "upon", "shall", "will", "must", ""))
+# ff.all<-tm_map(ff.all, gsub, pattern = "free", replacement = "asdf")
+ff.all<-tm_map(ff.all, removeWords, character(0))
+ff.all<-tm_map(ff.all, removePunctuation)
+
+# tdm.all =  a Term Document Matrix
+tdm.all<-TermDocumentMatrix(ff.all)
+tdm.all=removeSparseTerms(tdm.all,0.99)
+```
+
+# Check the content of the corpus to make sure there is not too much nonsense
+
+```{r}
+writeLines(as.character(ff.all[[1]]))
+```
+
+# Make a barplot of the most frequent words
+
+```{r}
+#Bar Plot
+termFrequency <- rowSums(as.matrix(tdm.all))
+termFrequency <- subset(termFrequency, termFrequency>=150)
+
+png(paste("../output/", "MostCommonWords", ".png", sep=""), width=1500, height=1000)
+  par(mar=c(5,9,5,5)+1, mgp=c(5,1,0))
+  barplot(termFrequency, horiz=TRUE, las=1, xlab="count", ylab="Word", main="Most Frequent Words from all Inauguration Speeches", cex.lab=2, cex.main=2, cex.axis=2)
+dev.off()
+
+
+```
+
+# sentiment analysis
+
+```{r}
+# Convert back to data frame
+dtmsparse = as.data.frame(as.matrix(tdm.all))
+
+# load the two sets of positive/negative words
+positive=readLines("../data/positivewords.txt")
+negative=readLines("../data/negativewords.txt")
+
+
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Convert corpus to data frame
+
+```{r}
+# tokenize the corpus
+myCorpusTokenized <- lapply(ff.all, scan_tokenizer)
+# concatenate tokens by document, create data frame
+myDf <- data.frame(text = sapply(myCorpusTokenized, paste, collapse = " "), stringsAsFactors = FALSE)
+
+```
+
+# unnesting and other preparation
+
+```{r}
+# put one word per row
+myDf = myDf %>% unnest_tokens(word, text)
+
+
+```
+
+
+
+
+# Correlation between ith and (i+1)th president
+
+```{r}
+library(scales)
+
+
+
+```
+
